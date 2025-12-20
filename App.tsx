@@ -4,10 +4,20 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Heart } from 'lucide-react';
 import FloatingEmojis from './components/FloatingEmojis';
 import LoveLines from './components/LoveLines';
+import SideMenu from './components/SideMenu';
+import Slideshow from './components/Slideshow';
 import bgImage from './background.jpeg';
 
 const App: React.FC = () => {
   const [stage, setStage] = useState(0);
+  const [showSlideshow, setShowSlideshow] = useState(false);
+
+  // Handle menu selection
+  const handleMenuSelect = (id: string) => {
+    if (id === 'slideshow') {
+      setShowSlideshow(true);
+    }
+  };
 
   useEffect(() => {
     // Sequence the animations
@@ -118,6 +128,14 @@ const App: React.FC = () => {
 
       {/* Decorative Bottom Gradient */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
+
+      {/* Side Menu */}
+      <SideMenu onSelect={handleMenuSelect} />
+
+      {/* Slideshow Overlay */}
+      <AnimatePresence>
+        {showSlideshow && <Slideshow onClose={() => setShowSlideshow(false)} />}
+      </AnimatePresence>
     </div>
   );
 };
