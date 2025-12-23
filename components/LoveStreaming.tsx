@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Play, Info } from 'lucide-react';
+import { X, Play, Info, Pause, ArrowLeft, Volume2, VolumeX, Maximize, RotateCcw } from 'lucide-react';
 
 // Import videos
 import video1 from '../Videos/IMG_3738.MOV';
 import video2 from '../Videos/IMG_4242.MP4';
+import thumbnail1 from '../Videos/thumbnail_journey.png';
+import thumbnail2 from '../Videos/thumbnail_forever.png';
 
 import { Heart } from 'lucide-react';
 
@@ -15,6 +17,13 @@ interface LoveStreamingProps {
 const LoveStreaming: React.FC<LoveStreamingProps> = ({ onClose }) => {
     const [loading, setLoading] = useState(true);
     const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
+    const [isPlaying, setIsPlaying] = useState(true);
+    const [showControls, setShowControls] = useState(true);
+    const [progress, setProgress] = useState(0);
+    const [isMuted, setIsMuted] = useState(false);
+
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     // Initial Loading Animation Timer
     useEffect(() => {
@@ -24,22 +33,67 @@ const LoveStreaming: React.FC<LoveStreamingProps> = ({ onClose }) => {
         return () => clearTimeout(timer);
     }, []);
 
+    // Controls Visibility Timer
+    const handleMouseMove = () => {
+        setShowControls(true);
+        if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+        controlsTimeoutRef.current = setTimeout(() => {
+            if (isPlaying) setShowControls(false);
+        }, 3000);
+    };
+
+    useEffect(() => {
+        if (selectedVideo) {
+            handleMouseMove();
+            return () => {
+                if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+            };
+        }
+    }, [selectedVideo, isPlaying]);
+
+    const togglePlay = () => {
+        if (videoRef.current) {
+            if (isPlaying) {
+                videoRef.current.pause();
+            } else {
+                videoRef.current.play();
+            }
+            setIsPlaying(!isPlaying);
+        }
+    };
+
+    const handleTimeUpdate = () => {
+        if (videoRef.current) {
+            const currentProgress = (videoRef.current.currentTime / videoRef.current.duration) * 100;
+            setProgress(currentProgress);
+        }
+    };
+
+    const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (videoRef.current) {
+            const time = (parseFloat(e.target.value) / 100) * videoRef.current.duration;
+            videoRef.current.currentTime = time;
+            setProgress(parseFloat(e.target.value));
+        }
+    };
+
+
+    // ... (existing imports)
+
     const videos = [
         {
             id: 1,
             src: video1,
             title: "Our Beautiful Journey",
-            thumbnail: video1, // Using video as thumb for now
-            duration: "Memorable",
-            match: "98% Match"
+            thumbnail: thumbnail1,
+            duration: "Memorable"
         },
         {
             id: 2,
             src: video2,
             title: "Forever & Always",
-            thumbnail: video2,
-            duration: "Eternal",
-            match: "100% Match"
+            thumbnail: thumbnail2,
+            duration: "Eternal"
         }
     ];
 
@@ -86,6 +140,7 @@ const LoveStreaming: React.FC<LoveStreamingProps> = ({ onClose }) => {
                                 autoPlay
                                 loop
                                 muted
+                                playsInline
                                 className="w-full h-full object-cover opacity-60"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-black/30" />
@@ -99,9 +154,8 @@ const LoveStreaming: React.FC<LoveStreamingProps> = ({ onClose }) => {
                             >
                                 <h1 className="text-5xl md:text-7xl font-bold mb-2">Sachin <Heart className="w-12 h-12 text-rose-500 fill-rose-500 animate-pulse" /> Priyanka</h1>
                                 <div className="flex items-center gap-3 text-green-400 font-semibold mb-4">
-                                    <span>99% Match</span>
                                     <span className="text-white/60 border border-white/40 px-1 text-sm">HD</span>
-                                    <span className="text-white">2 Seasons</span>
+                                    <span className="text-white">2 Videos</span>
                                 </div>
                                 <p className="text-lg text-white/90 drop-shadow-md line-clamp-3">
                                     A timeless romance capturing the beautiful moments of two souls intertwined by destiny. Watch their journey unfold in this exclusive special feature.
@@ -110,7 +164,10 @@ const LoveStreaming: React.FC<LoveStreamingProps> = ({ onClose }) => {
 
                             <div className="flex gap-4 pt-4">
                                 <button
-                                    onClick={() => setSelectedVideo(video1)}
+                                    onClick={() => {
+                                        setSelectedVideo(video1);
+                                        setIsPlaying(true);
+                                    }}
                                     className="flex items-center gap-2 bg-white text-black px-6 py-2 rounded font-bold hover:bg-white/90 transition-colors"
                                 >
                                     <Play fill="black" size={24} /> Play
@@ -131,10 +188,15 @@ const LoveStreaming: React.FC<LoveStreamingProps> = ({ onClose }) => {
                                     key={video.id}
                                     whileHover={{ scale: 1.05, zIndex: 20 }}
                                     className="bg-[#2f2f2f] rounded-md overflow-hidden cursor-pointer group relative aspect-video"
-                                    onClick={() => setSelectedVideo(video.src)}
+                                    onClick={() => {
+                                        setSelectedVideo(video.src);
+                                        setIsPlaying(true);
+                                    }}
                                 >
-                                    <video
-                                        src={video.src}
+                                    <img
+                                        src={video.thumbnail}
+                                        alt={video.title}
+                                        loading="lazy"
                                         className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
                                     />
 
@@ -147,36 +209,113 @@ const LoveStreaming: React.FC<LoveStreamingProps> = ({ onClose }) => {
                                             </div>
                                         </div>
                                         <h4 className="font-bold text-sm">{video.title}</h4>
-                                        <p className="text-green-400 text-xs font-semibold">{video.match}</p>
                                     </div>
                                 </motion.div>
                             ))}
                         </div>
                     </div>
 
-                    {/* Video Modal */}
+                    {/* Full-Screen Immersive Video Player */}
                     <AnimatePresence>
                         {selectedVideo && (
                             <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                className="fixed inset-0 z-50 bg-black flex items-center justify-center p-4 backdrop-blur-xl"
+                                initial={{ opacity: 0, scale: 1.1 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 1.1 }}
+                                transition={{ duration: 0.4, ease: "easeOut" }}
+                                onMouseMove={handleMouseMove}
+                                className="fixed inset-0 z-[60] bg-black flex items-center justify-center overflow-hidden"
                             >
-                                <div className="relative w-full max-w-6xl aspect-video bg-black rounded-lg shadow-2xl overflow-hidden border border-white/10">
-                                    <button
-                                        onClick={() => setSelectedVideo(null)}
-                                        className="absolute top-4 right-4 z-50 p-2 bg-black/60 rounded-full text-white hover:bg-white hover:text-black transition-all"
-                                    >
-                                        <X size={24} />
-                                    </button>
-                                    <video
-                                        src={selectedVideo}
-                                        controls
-                                        autoPlay
-                                        className="w-full h-full"
-                                    />
-                                </div>
+                                <video
+                                    ref={videoRef}
+                                    src={selectedVideo}
+                                    autoPlay
+                                    playsInline
+                                    muted={isMuted}
+                                    onTimeUpdate={handleTimeUpdate}
+                                    onClick={togglePlay}
+                                    className="w-full h-full object-contain"
+                                />
+
+                                {/* Play/Pause Display Animation Overlay */}
+                                <AnimatePresence>
+                                    {!isPlaying && (
+                                        <motion.div
+                                            initial={{ opacity: 0, scale: 0.5 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            exit={{ opacity: 0, scale: 1.5 }}
+                                            className="absolute pointer-events-none"
+                                        >
+                                            <div className="bg-black/40 p-8 rounded-full backdrop-blur-md">
+                                                <Play size={100} className="text-white fill-white" />
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
+                                {/* Custom Controls Overlay */}
+                                <motion.div
+                                    animate={{ opacity: showControls ? 1 : 0 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="absolute inset-0 flex flex-col justify-between p-6 md:p-12 bg-gradient-to-b from-black/60 via-transparent to-black/80 pointer-events-none select-none"
+                                >
+                                    {/* Top Area: Back Button */}
+                                    <div className="flex items-start">
+                                        <button
+                                            onClick={() => setSelectedVideo(null)}
+                                            className="pointer-events-auto flex items-center gap-2 group"
+                                        >
+                                            <div className="p-3 rounded-full hover:bg-white/20 transition-all group-hover:scale-110">
+                                                <ArrowLeft size={32} />
+                                            </div>
+                                            <span className="text-xl font-medium opacity-0 group-hover:opacity-100 transition-opacity translate-x-[-10px] group-hover:translate-x-0">Back to Love Stream</span>
+                                        </button>
+                                    </div>
+
+                                    {/* Bottom Area: Progress and Controls */}
+                                    <div className="space-y-6 md:space-y-8 pointer-events-auto">
+                                        {/* Progress Bar */}
+                                        <div className="relative group w-full flex items-center gap-4">
+                                            <input
+                                                type="range"
+                                                min="0"
+                                                max="100"
+                                                value={progress}
+                                                onChange={handleSeek}
+                                                className="w-full h-1 md:h-2 accent-[#E50914] bg-white/30 rounded-full appearance-none cursor-pointer hover:h-4 transition-all"
+                                            />
+                                        </div>
+
+                                        {/* Controls Bar */}
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-8 md:gap-12">
+                                                <button onClick={togglePlay} className="hover:scale-110 transition-transform">
+                                                    {isPlaying ? <Pause size={36} fill="white" /> : <Play size={36} fill="white" />}
+                                                </button>
+
+                                                <button onClick={() => {
+                                                    if (videoRef.current) videoRef.current.currentTime -= 10;
+                                                }} className="hover:scale-110 transition-transform opacity-80 hover:opacity-100">
+                                                    <RotateCcw size={32} />
+                                                </button>
+
+                                                <button onClick={() => setIsMuted(!isMuted)} className="hover:scale-110 transition-transform opacity-80 hover:opacity-100">
+                                                    {isMuted ? <VolumeX size={32} /> : <Volume2 size={32} />}
+                                                </button>
+                                            </div>
+
+                                            <div className="hidden md:block text-2xl font-bold text-white/90 italic tracking-widest uppercase">
+                                                Forever Love • In Motion
+                                            </div>
+
+                                            <div>
+                                                <button className="hover:scale-110 transition-transform opacity-80 hover:opacity-100">
+                                                    <Maximize size={32} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </motion.div>
                             </motion.div>
                         )}
                     </AnimatePresence>
