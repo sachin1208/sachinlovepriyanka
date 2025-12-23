@@ -278,7 +278,7 @@ const LoveStreaming: React.FC<LoveStreamingProps> = ({ onClose }) => {
                                 exit={{ opacity: 0, scale: 1.1 }}
                                 transition={{ duration: 0.4, ease: "easeOut" }}
                                 onMouseMove={handleMouseMove}
-                                className="fixed inset-0 z-[60] bg-black flex items-center justify-center overflow-hidden"
+                                className="fixed inset-0 z-[60] bg-black flex items-center justify-center overflow-hidden h-[100dvh]"
                             >
                                 <video
                                     ref={videoRef}
@@ -287,7 +287,7 @@ const LoveStreaming: React.FC<LoveStreamingProps> = ({ onClose }) => {
                                     muted={isMuted}
                                     onTimeUpdate={handleTimeUpdate}
                                     onClick={togglePlay}
-                                    className="w-full h-full object-contain"
+                                    className="w-full h-full object-cover"
                                 />
 
                                 <AnimatePresence>
@@ -308,7 +308,7 @@ const LoveStreaming: React.FC<LoveStreamingProps> = ({ onClose }) => {
                                 <motion.div
                                     animate={{ opacity: showControls ? 1 : 0 }}
                                     transition={{ duration: 0.3 }}
-                                    className="absolute inset-0 flex flex-col justify-between p-6 md:p-12 bg-gradient-to-b from-black/60 via-transparent to-black/80 pointer-events-none select-none"
+                                    className="absolute inset-x-0 bottom-0 top-0 flex flex-col justify-between p-6 md:p-12 bg-gradient-to-b from-black/60 via-transparent to-black/80 pointer-events-none select-none"
                                 >
                                     <div className="flex items-start">
                                         <button
