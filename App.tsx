@@ -6,16 +6,20 @@ import FloatingEmojis from './components/FloatingEmojis';
 import LoveLines from './components/LoveLines';
 import SideMenu from './components/SideMenu';
 import Slideshow from './components/Slideshow';
+import LoveStreaming from './components/LoveStreaming';
 import bgImage from './background.jpeg';
 
 const App: React.FC = () => {
   const [stage, setStage] = useState(0);
   const [showSlideshow, setShowSlideshow] = useState(false);
+  const [showStreaming, setShowStreaming] = useState(false);
 
   // Handle menu selection
   const handleMenuSelect = (id: string) => {
     if (id === 'slideshow') {
       setShowSlideshow(true);
+    } else if (id === 'streaming') {
+      setShowStreaming(true);
     }
   };
 
@@ -135,6 +139,13 @@ const App: React.FC = () => {
       {/* Slideshow Overlay */}
       <AnimatePresence>
         {showSlideshow && <Slideshow onClose={() => setShowSlideshow(false)} />}
+      </AnimatePresence>
+
+
+      {/* Love in Motion Overlay */}
+      <AnimatePresence>
+        {stage >= 0 && /* Just ensuring it has access to context if needed, though independent */ null}
+        {showStreaming && <LoveStreaming onClose={() => setShowStreaming(false)} />}
       </AnimatePresence>
     </div>
   );

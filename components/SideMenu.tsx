@@ -11,6 +11,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ onSelect }) => {
 
     const menuItems = [
         { label: 'Together Forever', id: 'slideshow' },
+        { label: 'Love in Motion', id: 'streaming' },
         { label: 'Journey of Love', id: 'journey' },
         { label: 'Our Memories', id: 'memories' },
         { label: 'Future Dreams', id: 'dreams' },
