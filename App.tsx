@@ -7,12 +7,23 @@ import LoveLines from './components/LoveLines';
 import SideMenu from './components/SideMenu';
 import Slideshow from './components/Slideshow';
 import LoveStreaming from './components/LoveStreaming';
+import ValentineSurprise from './components/ValentineSurprise';
 import bgImage from './background.jpeg';
 
 const App: React.FC = () => {
   const [stage, setStage] = useState(0);
   const [showSlideshow, setShowSlideshow] = useState(false);
   const [showStreaming, setShowStreaming] = useState(false);
+  const [showValentine, setShowValentine] = useState(false);
+  const [isValentineDay, setIsValentineDay] = useState(false);
+
+  useEffect(() => {
+    // Check if today is Valentine's Day
+    const today = new Date();
+    if (today.getMonth() === 1 && today.getDate() === 14) {
+      setIsValentineDay(true);
+    }
+  }, []);
 
   // Handle menu selection
   const handleMenuSelect = (id: string) => {
@@ -135,6 +146,37 @@ const App: React.FC = () => {
 
       {/* Side Menu */}
       <SideMenu onSelect={handleMenuSelect} />
+
+      {/* Valentine's Surprise Trigger Button */}
+      <AnimatePresence>
+        {stage >= 3 && (
+          <motion.button
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: 1,
+              boxShadow: ["0 0 0px #f43f5e", "0 0 20px #f43f5e", "0 0 0px #f43f5e"]
+            }}
+            whileHover={{ scale: 1.3 }}
+            transition={{
+              scale: { repeat: Infinity, duration: 2 },
+              boxShadow: { repeat: Infinity, duration: 2 }
+            }}
+            onClick={() => setShowValentine(true)}
+            className="fixed bottom-8 right-8 z-[60] bg-rose-500 p-4 rounded-full text-white shadow-xl flex items-center gap-2 group"
+          >
+            <Heart className="w-8 h-8 fill-white" />
+            <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 font-romantic text-xl whitespace-nowrap">
+              Your Surprise Priyanka!
+            </span>
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      {/* Valentine Overlay */}
+      <AnimatePresence>
+        {showValentine && <ValentineSurprise onClose={() => setShowValentine(false)} />}
+      </AnimatePresence>
 
       {/* Slideshow Overlay */}
       <AnimatePresence>

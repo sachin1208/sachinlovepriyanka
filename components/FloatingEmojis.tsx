@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 
-const EMOJIS = ['❤️', '💖', '💕', '💗', '💓', '🥰', '🌹', '✨'];
+const EMOJIS = ['❤️', '💖', '💕', '💗', '💓', '🥰', '🌹', '✨', '💝', '💑'];
 
 interface Particle {
   id: number;
@@ -16,13 +16,13 @@ const FloatingEmojis: React.FC = () => {
   const [particles, setParticles] = useState<Particle[]>([]);
 
   useEffect(() => {
-    const newParticles = Array.from({ length: 30 }).map((_, i) => ({
+    const newParticles = Array.from({ length: 50 }).map((_, i) => ({
       id: i,
       x: `${Math.random() * 100}%`,
       emoji: EMOJIS[Math.floor(Math.random() * EMOJIS.length)],
-      duration: 5 + Math.random() * 10,
-      delay: Math.random() * 10,
-      size: 15 + Math.random() * 30,
+      duration: 8 + Math.random() * 12,
+      delay: Math.random() * 15,
+      size: 15 + Math.random() * 40,
     }));
     setParticles(newParticles);
   }, []);
